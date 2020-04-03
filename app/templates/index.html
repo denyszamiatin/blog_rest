@@ -5,6 +5,19 @@
     <title>Blog</title>
 </head>
 <body>
-    <h1>Hello!</h1>
+    {% block content %}
+    <h1>Blog</h1>
+    <p><a href="/add">Add</a></p>
+    {% for message in get_flashed_messages() %}
+        <p>{{message}}</p>
+    {% endfor %}
+    {% endblock %}
+    {% block posts_list %}
+    {% for post in posts %}
+    <h3>{{ post.0 }}</h3>
+    <p><i>{{ post.2 }}</i></p>
+    <p>{{ post.1 }}</p>
+    {% endfor %}
+    {% endblock %}
 </body>
 </html>

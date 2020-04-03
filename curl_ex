@@ -1,0 +1,4 @@
+POST:
+	curl -X POST http://localhost:5000/posts -H "Content-Type: application/json" -d '{"title": "Title1", "body": "enfiqpev130", "date": "01.04.2020"}' -v
+GET:
+	curl http://localhost:5000/posts

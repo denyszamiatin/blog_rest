@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "index.html" %}
+{% block content %}
+{{ super() }}
+<form method="post">
+    <p><input type="text" name="title" value="{{title}}"></p>
+    <p><textarea name="body">{{body}}</textarea></p>
+    <p><input type="date" name="date" value="{{date}}"></p>
+    <p><input type="submit" value="Ok"></p>
+</form>
+{% endblock %}
+{% block posts_list %}
+{% endblock %}
