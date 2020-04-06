@@ -1,25 +1,13 @@
 from flask import request
-from flask_restful import Resource, reqparse
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 from app import api, db
 from . import models
+from . import schemas
 
 
-class PostSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = models.Post
-        exclude = "id",
-        load_instance = True
-
-
-post_schema = PostSchema()
-posts_schema = PostSchema(many=True)
-
-parser = reqparse.RequestParser()
-parser.add_argument("title")
-parser.add_argument("body")
-parser.add_argument("date")
+post_schema = schemas.PostSchema()
+posts_schema = schemas.PostSchema(many=True)
 
 
 class PostListApi(Resource):
@@ -50,12 +38,13 @@ class PostApi(Resource):
         post = db.session.query(models.Post).filter_by(uuid=uuid).first()
         if post is None:
             return "", 404
-        post.title = args['title']
-        post.body = args['body']
-        post.pub_date = args['date']
+        try:
+            post = post_schema.load(request.json, instance=post, session=db.session)
+        except ValidationError as e:
+            return {"message": str(e)}
         db.session.add(post)
         db.session.commit()
-        return post.to_json()
+        return post_schema.dump(post)
 
     def delete(self, uuid):
         post = db.session.query(models.Post).filter_by(uuid=uuid).first()
@@ -64,7 +53,6 @@ class PostApi(Resource):
         db.session.delete(post)
         db.session.commit()
         return "", 204
-
 
 
 api.add_resource(PostListApi, '/posts')
