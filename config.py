@@ -19,3 +19,10 @@ class DevConfig(Config):
     ENV = 'development'
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(BASE_DIR / "data" / "db.sqlite3")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestConfig(Config):
+    DEBUG = True
+    ENV = 'testing'
+    SQLALCHEMY_DATABASE_URI = "sqlite://:memory:"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False

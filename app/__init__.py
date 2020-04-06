@@ -8,6 +8,7 @@ import config
 configs = {
     'dev': config.DevConfig,
     'prod': config.ProdConfig,
+    'test': config.TestConfig,
 }
 
 app = Flask(__name__)
