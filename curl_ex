@@ -1,4 +1,7 @@
 POST:
 	curl -X POST http://localhost:5000/posts -H "Content-Type: application/json" -d '{"title": "Title1", "body": "enfiqpev130", "date": "01.04.2020"}' -v
 GET:
-	curl http://localhost:5000/posts
+	curl http://localhost:5000/posts -v
+	curl http://localhost:5000/posts/3a3c19b2-6846-4765-a544-fe8eac325cc9 -v
+PUT:
+	curl -X PUT http://localhost:5000/posts/3a3c19b2-6846-4765-a544-fe8eac325cc9 -H "Content-Type: application/json" -d '{"title": "Title2", "body": "enfiqpev130", "date": "01.05.2020"}' -v

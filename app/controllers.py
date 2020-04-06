@@ -22,4 +22,26 @@ class PostListApi(Resource):
         return [post.to_json() for post in posts]
 
 
+class PostApi(Resource):
+
+    def get(self, uuid):
+        post = db.session.query(models.Post).filter_by(uuid=uuid).first()
+        if post is None:
+            return "", 404
+        return post.to_json()
+
+    def put(self, uuid):
+        args = parser.parse_args()
+        post = db.session.query(models.Post).filter_by(uuid=uuid).first()
+        if post is None:
+            return "", 404
+        post.title = args['title']
+        post.body = args['body']
+        post.pub_date = args['date']
+        db.session.add(post)
+        db.session.commit()
+        return post.to_json()
+
+
 api.add_resource(PostListApi, '/posts')
+api.add_resource(PostApi, '/posts/<uuid>')
