@@ -1,6 +1,20 @@
+from flask import request
 from flask_restful import Resource, reqparse
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow.exceptions import ValidationError
 from app import api, db
 from . import models
+
+
+class PostSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = models.Post
+        exclude = "id",
+        load_instance = True
+
+
+post_schema = PostSchema()
+posts_schema = PostSchema(many=True)
 
 parser = reqparse.RequestParser()
 parser.add_argument("title")
@@ -11,15 +25,17 @@ parser.add_argument("date")
 class PostListApi(Resource):
 
     def post(self):
-        args = parser.parse_args()
-        post = models.Post(args["title"], args["body"], args["date"])
+        try:
+            post = post_schema.load(request.json, session=db.session)
+        except ValidationError as e:
+            return {"message": str(e)}, 400
         db.session.add(post)
         db.session.commit()
-        return post.to_json(), 201
+        return post_schema.dump(post), 201
 
     def get(self):
         posts = db.session.query(models.Post).all()
-        return [post.to_json() for post in posts]
+        return posts_schema.dump(posts)
 
 
 class PostApi(Resource):
@@ -28,10 +44,9 @@ class PostApi(Resource):
         post = db.session.query(models.Post).filter_by(uuid=uuid).first()
         if post is None:
             return "", 404
-        return post.to_json()
+        return post_schema.dump(post)
 
     def put(self, uuid):
-        args = parser.parse_args()
         post = db.session.query(models.Post).filter_by(uuid=uuid).first()
         if post is None:
             return "", 404
