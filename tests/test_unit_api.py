@@ -72,4 +72,24 @@ def test_post_update():
     assert r.json == data
 
 
+def test_post_put_not_found():
+    with mock.patch("app.db.session.query") as query:
+        query.return_value.filter_by.return_value.first.return_value = None
+        r = app.test_client().put("/posts/123", data={})
+    assert r.status_code == 404
 
+
+def test_post_delete():
+    with mock.patch("app.db.session.query") as query, \
+            mock.patch("app.db.session.delete") as delete, \
+            mock.patch("app.db.session.commit") as commit:
+        query.return_value.filter_by.return_value.first.return_value = MockPost()
+        r = app.test_client().delete('/posts/123')
+    assert r.status_code == 204
+
+
+def test_post_delete_not_found():
+    with mock.patch("app.db.session.query") as query:
+        query.return_value.filter_by.return_value.first.return_value = None
+        r = app.test_client().delete("/posts/123")
+    assert r.status_code == 404

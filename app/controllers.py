@@ -42,6 +42,15 @@ class PostApi(Resource):
         db.session.commit()
         return post.to_json()
 
+    def delete(self, uuid):
+        post = db.session.query(models.Post).filter_by(uuid=uuid).first()
+        if post is None:
+            return "", 404
+        db.session.delete(post)
+        db.session.commit()
+        return "", 204
+
+
 
 api.add_resource(PostListApi, '/posts')
 api.add_resource(PostApi, '/posts/<uuid>')
