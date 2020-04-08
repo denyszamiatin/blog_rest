@@ -29,6 +29,18 @@ def test_post_create():
     assert r.json['uuid'] == "123"
 
 
+def test_post_create_validation():
+    r = app.test_client().post("/posts", data=json.dumps({
+        "title": "title1",
+        "body": "qwdfwbeeta",
+        "date": "2020-51-01T00:00"
+    }), content_type="application/json")
+    assert r.status_code == 400
+    assert r.json == {'message': "{'date': ['Not a valid datetime.'], "
+                                 "'title': ['First letter in the title must be in uppercase']}"
+                      }
+
+
 def test_post_read_all():
     with mock.patch("app.db.session.query") as query:
         query.return_value.all.return_value = [MockPost(), MockPost()]
@@ -67,7 +79,7 @@ def test_post_update():
     assert r.json == data
 
 
-def test_post_put_not_found():
+def test_post_update_not_found():
     with mock.patch("app.db.session.query") as query:
         query.return_value.filter_by.return_value.first.return_value = None
         r = app.test_client().put("/posts/123", data={})

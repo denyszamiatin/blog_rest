@@ -38,10 +38,7 @@ class PostApi(Resource):
         post = db.session.query(models.Post).filter_by(uuid=uuid).first()
         if post is None:
             return "", 404
-        try:
-            post = post_schema.load(request.json, instance=post, session=db.session)
-        except ValidationError as e:
-            return {"message": str(e)}
+        post = post_schema.load(request.json, instance=post, session=db.session)
         db.session.add(post)
         db.session.commit()
         return post_schema.dump(post)

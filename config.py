@@ -24,5 +24,5 @@ class DevConfig(Config):
 class TestConfig(Config):
     DEBUG = True
     ENV = 'testing'
-    SQLALCHEMY_DATABASE_URI = "sqlite://:memory:"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
