@@ -1,3 +1,5 @@
+import json
+import datetime
 from unittest import mock
 import pytest
 from app import app
@@ -7,21 +9,19 @@ class MockPost:
     def __init__(self):
         self.title = "Title1"
         self.body = ""
-        self.date = "2020-01-01T00:00"
+        self.date = datetime.datetime.strptime("2020-01-01T00:00", "%Y-%m-%dT%H:%M")
 
 
 def test_post_create():
     with mock.patch("app.db.session.add") as add, \
             mock.patch("app.db.session.commit") as commit, \
-            mock.patch("uuid.uuid4") as uuid, \
-            mock.patch("app.db.session") as session:
+            mock.patch("uuid.uuid4") as uuid:
         uuid.return_value = "123"
-        r = app.test_client().post("/posts", data={
+        r = app.test_client().post("/posts", data=json.dumps({
             "title": "Title1",
             "body": "qwdfwbeeta",
             "date": "2020-01-01T00:00"
-        })
-        print(r.data)
+        }), content_type="application/json")
         add.assert_called_once()
         commit.assert_called_once()
     assert r.status_code == 201
@@ -29,7 +29,6 @@ def test_post_create():
     assert r.json['uuid'] == "123"
 
 
-@pytest.mark.skip
 def test_post_read_all():
     with mock.patch("app.db.session.query") as query:
         query.return_value.all.return_value = [MockPost(), MockPost()]
@@ -38,7 +37,6 @@ def test_post_read_all():
     assert len(r.json) == 2
 
 
-@pytest.mark.skip
 def test_post_read():
     with mock.patch("app.db.session.query") as query:
         query.return_value.filter_by.return_value.first.return_value = MockPost()
@@ -54,18 +52,17 @@ def test_post_read_not_found():
     assert r.status_code == 404
 
 
-@pytest.mark.skip
 def test_post_update():
     data = {
         "title": "Title2",
         "body": "qwert",
-        "date": "01.01.2021",
+        "date": "2021-01-01T00:00:00",
     }
     with mock.patch("app.db.session.query") as query, \
             mock.patch("app.db.session.add") as add, \
             mock.patch("app.db.session.commit") as commit:
         query.return_value.filter_by.return_value.first.return_value = MockPost()
-        r = app.test_client().put('/posts/123', data=data)
+        r = app.test_client().put('/posts/123', data=json.dumps(data), content_type="application/json")
     assert r.status_code == 200
     assert r.json == data
 
