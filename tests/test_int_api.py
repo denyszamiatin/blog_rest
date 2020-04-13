@@ -55,3 +55,19 @@ def test_post_delete(post):
     assert r.status_code == 204
     r = app.test_client().get(f"/post/{post}")
     assert r.status_code == 404
+
+
+def test_user_create(get_db):
+    user = {
+        "login": "user1",
+        "email": "user1@example.org",
+        "password": "1"
+    }
+    r = app.test_client().post("/users", data=json.dumps(user),content_type="application/json")
+    assert r.status_code == 201
+
+
+def test_user_read_all(get_db):
+    r = app.test_client().get("/users")
+    assert r.status_code == 200
+    assert len(r.json) == 0

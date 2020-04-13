@@ -7,6 +7,7 @@ BASE_DIR = pathlib.Path(__file__).parent
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
+    ITEMS_ON_PAGE = 2
 
 
 class ProdConfig(Config):
