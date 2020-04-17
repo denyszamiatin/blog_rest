@@ -1,0 +1,3 @@
+Hello,
+
+See new post at http://localhost:8000/posts/{{uuid}}

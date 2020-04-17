@@ -1,11 +1,12 @@
-from flask import request
+from flask import request, render_template
 from flask_restful import Resource
 from marshmallow.exceptions import ValidationError
 from sqlalchemy.exc import IntegrityError
-from app import api, db, app
+from . import api, db, app
 from . import models
 from . import schemas
-from .import auth
+from . import auth
+from . import tasks
 
 
 post_schema = schemas.PostSchema()
@@ -24,6 +25,10 @@ class PostListApi(Resource):
         post.author = user
         db.session.add(post)
         db.session.commit()
+        emails = [user[0] for user in db.session.query(models.User.email).all()]
+        subj = f"New post from {user.login}"
+        message = render_template("email.txt", uuid=post.uuid)
+        tasks.send_emails.delay('user1@example.org', emails, subj, message)
         return post_schema.dump(post), 201
 
     def get(self):
