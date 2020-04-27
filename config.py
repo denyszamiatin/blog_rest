@@ -21,7 +21,7 @@ class ProdConfig(Config):
 class DevConfig(Config):
     DEBUG = True
     ENV = 'development'
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(BASE_DIR / "data" / "db.sqlite3")
+    SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(BASE_DIR / "dev_data" / "db.sqlite3")
 
 
 class TestConfig(Config):

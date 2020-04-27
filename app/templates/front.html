@@ -1,0 +1,181 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Blog</title>{% endblock %}
+
+{% block scripts %}
+<script>
+function displaySignUp() {
+    document.querySelector("#signup").style.display = 'block';
+}
+
+function displaySignIn() {
+    document.querySelector("#signin").style.display = 'block';
+}
+
+function displayPostForm() {
+    document.querySelector("#post-form").style.display = 'block';
+}
+
+function signupUser() {
+    var login = document.querySelector('#signup-login').value;
+    var email = document.querySelector('#signup-email').value;
+    var password = document.querySelector('#signup-password').value;
+    var ok = true
+    fetch("http://localhost:5000/users", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            login: login,
+            email: email,
+            password: password
+        })
+    })
+    .then(function(res){
+        if (res.status > 299) {
+            ok = false
+        };
+        return res.json();
+    })
+    .then(function(data){
+        if (ok) {
+            document.querySelector("#signup").style.display = 'none';
+            document.querySelector("#messages").innerHTML = "User has been created successfully";
+        } else {
+            document.querySelector("#messages").innerHTML = data.message;
+        }
+    })
+}
+
+function signinUser() {
+    var login = document.querySelector('#signin-login').value;
+    var password = document.querySelector('#signin-password').value;
+    fetch("http://localhost:5000/login", {
+        method: "GET",
+        headers: {
+            "Authorization": "Basic " + btoa(`${login}:${password}`)
+        }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        document.token = data.token;
+        document.querySelector('#signin').style.display = 'none'
+    });
+}
+
+function newPost() {
+    var title = document.querySelector('#new-title').value;
+    var body = document.querySelector('#new-body').value;
+    var date = document.querySelector('#new-date').value;
+    var ok = true;
+    fetch("http://localhost:5000/posts", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Api-Key": document.token,
+        },
+        body: JSON.stringify({
+            title: title,
+            body: body,
+            date: date
+        })
+    })
+    .then(function(res){
+        if (res.status > 299) {
+            ok = false
+        };
+        return res.json();
+    })
+    .then(function(data){
+        if (ok) {
+            document.querySelector("#post-form").style.display = 'none';
+            document.querySelector("#messages").innerHTML = "Post has been created successfully";
+        } else {
+            document.querySelector("#messages").innerHTML = data.message;
+        }
+    })
+}
+
+function getPosts(p) {
+    fetch(`http://localhost:5000/posts?p=${p}`, {
+        method: "GET",
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        res = ""
+        for (var node of data) {
+            var {author: {login: login}, title: title, body: body, date: date} = node
+            res += `<h3>${title}</h3><p>${date} - ${login}</p><p>${body}</p>`
+        }
+        document.querySelector('#posts').innerHTML = res
+    });
+}
+
+function displayAllPosts() {
+    document.querySelector("#all-posts").style.display = "block"
+    page = 1
+    getPosts(page)
+}
+
+function prevPage() {
+    page = (page > 1)?page - 1:page
+    getPosts(page)
+}
+
+function nextPage() {
+    getPosts(++page)
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="/#signup" onclick="displaySignUp()">Sign Up</a> |
+    <a href="/#signin" onclick="displaySignIn()">Sign In</a> |
+    <a href="/#newpost" onclick="displayPostForm()">New Post</a> |
+    <a href="/#allposts" onclick="displayAllPosts()">All Posts</a>
+
+    <div id="messages"></div>
+    <div style="display:none" id="signup">
+        <h3>Sign Up</h3>
+        <form>
+            <div class="form-group row">
+                <input type="text" name="login" class="form-control mb-2" id="signup-login" placeholder="Login">
+                <input type="text" name="email" class="form-control mb-2" id="signup-email" placeholder="Email">
+                <input type="password" name="password" class="form-control mb-2" id="signup-password" placeholder="Password">
+                <input type="submit" class="btn btn-primary" onclick="signupUser(); return false">
+            </div>
+        </form>
+    </div>
+
+    <div style="display:none" id="signin">
+        <h3>Sign In</h3>
+        <form>
+            <div class="form-group row">
+                <input type="text" name="login" class="form-control mb-2" id="signin-login" placeholder="Login">
+                <input type="password" name="password" class="form-control mb-2" id="signin-password" placeholder="Password">
+                <input type="submit" class="btn btn-primary" onclick="signinUser(); return false">
+            </div>
+        </form>
+    </div>
+
+    <div style="display:none" id="post-form">
+        <h3>New post</h3>
+        <form>
+            <div class="form-group row">
+                <input type="text" name="title" class="form-control mb-2" id="new-title" placeholder="Title">
+                <input type="text" name="body" class="form-control mb-2" id="new-body" placeholder="Body">
+                <input type="text" name="date" class="form-control mb-2" id="new-date" placeholder="Date">
+                <input type="submit" class="btn btn-primary" onclick="newPost(); return false">
+            </div>
+        </form>
+    </div>
+
+    <div style="display:none" id="all-posts">
+        <div id="posts"></div>
+        <a href="#" onclick="prevPage(); return false;">&lt;</a>
+        <a href="#" onclick="nextPage(); return false;">&gt;</a>
+    </div>
+</div>
+{% endblock %}
+

@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_restful import Api
+from flask_bootstrap import Bootstrap
 from sqlalchemy import MetaData
 import config
 
@@ -26,6 +27,8 @@ app.config.from_object(configs.get(os.getenv('APP_CONFIG'), config.ProdConfig))
 db = SQLAlchemy(app, metadata=MetaData(naming_convention=naming_convention))
 migrate = Migrate(app, db)
 api = Api(app)
+Bootstrap(app)
 
 from . import controllers
 from . import auth
+from . import front
